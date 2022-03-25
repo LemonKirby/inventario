@@ -7,120 +7,61 @@ class Insumo extends CI_Controller{
 		$this->load->model('Insumo_model');
 	}
 
+	public function index()
+	{	
+		$this->load->view('insumos');
+	}
+
 	public function getAll(){
-		//if($this->session->userdata('login') == true){
-			$res = $this->Insumo_model->getAll();
-
-			if($res != NULL){
-				$respuesta = array();
-				$respuesta['resultado'] = 'true';
-				$respuesta['mensaje'] = 'Registros obtenidos con éxito';
-				$respuesta['respuesta'] = $res;
-				echo json_encode($respuesta);
-			}
-			else{
-				$respuesta = array();
-				$respuesta['resultado'] = 'false';
-				$respuesta['mensaje'] = 'Hubo un error al obtener los registros';
-				echo json_encode($respuesta);
-			}
-
-		//}
+		$data = array("data"=>$this->Insumo_model->getAll());
+		$this->load->view($data);
 	}
 
-	public function insert(){
-		//if($this->session->userdata('login') == true){
-			$this->form_validation->set_rules('unidadMedida', 'unidadMedida', 'required|htmlspecialchars|trim');
-			$this->form_validation->set_rules('idProveedor', 'idProveedor', 'required|htmlspecialchars|trim');
-			$this->form_validation->set_rules('nombre', 'nombre', 'required|htmlspecialchars|trim');
-			if($this->form_validation->run()){
-				$unidadMedida = $this->input->post("unidadMedida");
-				$idProveedor  = $this->input->post("idProveedor");
-				$nombre = $this->input->post("nombre");
+	public function save(){
+		$nombre = $this->input->post("nombre");
+		$unidadMedida = $this->input->post("unidadMedida");
+		$idProveedor = $this->input->post("unidadMedida");
 
-				$data = array(
-					"unidadMedida" => $unidadMedida,
-					"idProveedor" => $idProveedor,
-					"nombre" => $nombre
-				);
+		$this->form_validation->set_rules('nombre', 'Nombre Insumo', 'required|min_length[50]');
+		$this->form_validation->set_rules('unidadMedida', 'Unidad de Medida', 'required||min_length[30]');
+		$this->form_validation->set_rules('idProveedor', 'idProveedor', 'required|min_length[1]');
 
-				$insumo = $this->Insumo_model->insert($data);
-
-				if($insumo != NULL){
-					$respuesta = array();
-					$respuesta['resultado'] = 'true';
-					$respuesta['mensaje'] = 'El registro se insertó correctamente';
-					echo json_encode($respuesta);
-				}
-				else{
-					$respuesta = array();
-					$respuesta['resultado'] = 'false';
-					$respuesta['mensaje'] = 'Hubo un error al insertar el registro';
-					echo json_encode($respuesta);
-				}
-			}
-			else{
-				$this->form_validation->set_error_delimiters('','');
-				$respuesta = array();
-				$respuesta['resultado'] = 'false';
-				$respuesta['mensaje'] = validation_errors();
-				echo json_encode($respuesta);
-			}
-		//}
-	}
-
-	public function edit(){
-		//if($this->session->userdata('login') == true){
-
-			$respuesta = array();
-			$respuesta['resultado'] = 'false';
-			$respuesta['mensaje'] = 'Ocurrio un error durante la petición';
-			$respuesta['respuesta'] = null;
-
-			$this->form_validation->set_rules('idInsumo', 'idInsumo', 'trim|integer|max_length[11]|greater_than_equal_to[1]|required');
-			$this->form_validation->set_rules('unidadMedida', 'unidadMedida', 'trim|integer|max_length[11]|greater_than_equal_to[1]|required');
-			$this->form_validation->set_rules('idProveedor', 'idProveedor', 'required|htmlspecialchars|max_length[50]|trim');
-			$this->form_validation->set_rules('nombre', 'nombre del proveedor', 'required|htmlspecialchars|max_length[50]|trim');
-
-			if($this->form_validation->run()/* &&  $this->input->is_ajax_request()*/){
-				$idInsumo   	= $this->input->post("idInsumo");
-				$unidadMedida 	= $this->input->post("unidadMedida");
-				$idProveedor    = $this->input->post("idProveedor");
-				$nombre 		= $this->input->post("nombre");
-
-				//revisar que exista el registro
-				$res = $this->Insumo_model->getById($idInsumo); 
-
-				if($res != NULL){
-					$data = array(
-						"unidadMedida"  => $unidadMedida,
-						"idProveedor"   => $idProveedor,
-						"nombre" 		=> $nombre
-					);
-
-					$is_affected = $this->Insumo_model->update($data, $idInsumo);
-
-					if($is_affected != NULL){
-						$respuesta['resultado'] = 'true';
-						$respuesta['mensaje'] = 'El registro se actualizó correctamente';
-					}else{
-						$respuesta['mensaje'] = 'No fue posible modificar el registro';
-					}
-
-				}
-
-			}
-
-            /*Si la validación de campos es incorrecta*/
-            else {
-            	$this->form_validation->set_error_delimiters('','');
-				$respuesta['error'] = validation_errors();
-            }
+		if ($this->form_validation->run() == FALSE){
+			$this->load->view('/controlador/detalleinsumo');
+		}else{
+			$data = array(
+				"nombre"=>$nombre,
+				"unidadMedida"=>$unidadMedida,
+				"idProveedor"=>$idProveedor
+			);
 			
-            echo json_encode($respuesta);
+			$this->Insumo_model->save($data);
+			redirect(base_url()."/controlador/insumo");
+		}
+}
+  public function update($id){
+	$nombre = $this->input->post("nombre");
+	$unidadMedida = $this->input->post("unidadMedida");
+	$idProveedor = $this->input->post("unidadMedida");
+	
+	$data=$this->Insumo_model->getById($id);
 
-		//}
+	$this->form_validation->set_rules('nombre', 'Nombre Insumo', 'required|min_length[50]');
+	$this->form_validation->set_rules('unidadMedida', 'Unidad de Medida', 'required||min_length[30]');
+	$this->form_validation->set_rules('idProveedor', 'idProveedor', 'required|min_length[1]');
+
+	if ($this->form_validation->run() == FALSE){
+		$this->index($id);
+	}else{
+		$data = array(
+			"nombre"=>$nombre,
+			"unidadMedida"=>$unidadMedida,
+			"idProveedor"=>$idProveedor
+		);
+		
+		$this->Insumo_model->update($data,$id);
 	}
+}
 
 	public function delete(){
 		//if($this->session->userdata('login') == true){
