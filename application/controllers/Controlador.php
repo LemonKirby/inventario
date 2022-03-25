@@ -29,6 +29,12 @@ class Controlador extends CI_Controller{
 		$this->load->view( "public/private/insumos" );
 		$this->load->view( "public/componentes/footer_f");
 	}
+	
+	public function insumosAdd(){
+		$this->load->view( "public/componentes/header_f" );
+		$this->load->view( "public/private/forma_insumosAdd" );
+		$this->load->view( "public/componentes/footer_f");
+	}
 
 	public function detalleinsumo(){
 		$this->load->view( "public/componentes/header_f" );
